@@ -1,104 +1,70 @@
-[Crossref Scraper](https://apify.com/fortuitous_pirate/crossref-scraper?fpr=data)
+[Crossref Scraper](https://apify.com/cloud9_ai/crossref-scraper?fpr=data)
 
-# CrossRef Scholarly Publications Scraper
-
-## Overview
-
-Extract scholarly publication metadata from CrossRef API covering 145M+ academic works. Get DOIs, titles, authors, citations, journals, and publication dates. Search by keywords, author, ISSN, or date range.
+Search and extract scholarly publication metadata from Crossref. Get DOIs, citations, authors, journals for 140M+ works.
 
 ## Features
 
-- Search by keywords to find specific results
-- Filter results by category or type
-- Export data in JSON, CSV, or Excel formats
+- Extract data from [https://api.crossref.org](https://api.crossref.org)
+- Multiple scraping modes: searchWorks, searchJournals
+- Automatic rate limiting (50 req/sec (polite))
+- Proxy support via Apify Proxy
 
-## Use Cases
+## Input Configuration
 
-- **Aggregate** - Aggregate academic papers and research data
-- **Build** - Build course catalogs and educational resource databases
-- **Track** - Track educational institution data and rankings
-- **Monitor** - Monitor academic publishing trends
+### Modes
 
-## Input Parameters
+1. **searchWorks**: /works?query={query}&rows=20&offset={offset}
+2. **searchJournals**: /journals?query={query}&rows=20&offset={offset}
 
-| Parameter | Type | Description | Default |
-| --- | --- | --- | --- |
-| `query` | string | Search query for scholarly works |  |
-| `doi` | string | Specific DOI to look up (e.g., 10.1038/nature12373) |  |
-| `author` | string | Filter by author name |  |
-| `publishedSince` | string | Filter works published after this date (YYYY-MM-DD) |  |
-| `type` | string | Type of scholarly work |  |
-| `mailto` | string | Your email for CrossRef's polite pool (faster rate limits) |  |
-| `limit` | integer | Maximum number of works to return | `100` |
-
-## Output Example
-
-Each result contains structured data like this:
+### Example Input
 
 ```
 {
-  "doi": "Sample doi",
-  "title": "Sample Education/Academic Result",
-  "authors": [
-    "J. Smith",
-    "A. Johnson"
-  ],
-  "type": "Standard",
-  "containerTitle": "Sample containerTitle",
-  "publisher": "Sample publisher",
-  "publishedDate": "2025-01-15",
-  "citedByCount": 127,
-  "url": "https://example.com/item/12345",
-  "abstract": "Detailed description of the item..."
+  "mode": "searchWorks",
+  "query": "example search",
+  "maxResults": 20
 }
 ```
 
-## Pricing
+## Output
 
-This actor uses pay-per-result pricing:
+The actor stores results in the Apify dataset. Each item contains:
 
-- **$0.001** per result
-- **$1.00** per 1,000 results
+- `DOI`
+- `title`
+- `author`
+- `container-title`
+- `published-print`
+- `type`
+- `is-referenced-by-count`
+- `subject`
+- `URL`
+- `abstract`
 
-No monthly fees. You only pay for what you scrape. [Apify Free plan](https://apify.com/pricing) includes $5/month in platform credits.
-
-## How to Run
-
-### Apify Console
-
-1. Go to the [CrossRef Scholarly Publications Scraper](https://apify.com/fortuitous_pirate/crossref-scraper) actor page
-2. Configure your input parameters
-3. Click **Start** and wait for the results
-4. Download data in JSON, CSV, or Excel format
-
-### API
+## Usage Example
 
 ```
-curl -X POST "https://api.apify.com/v2/acts/fortuitous_pirate~crossref-scraper/runs?token=YOUR_API_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"maxItems": 10}'
+const input = {
+  "mode": "searchWorks",
+  "query": "example search",
+  "maxResults": 20
+};
+
+const run = await ApifyClient.actor('crossref-scraper').call(input);
+const { items } = await ApifyClient.dataset(run.defaultDatasetId).listItems();
+
+console.log(items);
 ```
 
-### Python SDK
+## Limits
 
-```
-from apify_client import ApifyClient
+- Maximum results per run: 1000
+- Rate limiting: 50 req/sec (polite)
 
-client = ApifyClient("YOUR_API_TOKEN")
-run = client.actor("fortuitous_pirate/crossref-scraper").call(
-    run_input={"maxItems": 10}
-)
+## Support
 
-for item in client.dataset(run["defaultDatasetId"]).iterate_items():
-    print(item)
-```
+For issues or questions, contact the developer or open an issue on GitHub.
 
-## Integration
+## License
 
-Connect CrossRef Scholarly Publications Scraper with your existing tools and workflows:
-
-- **API access** - Programmatic access via [Apify API](https://docs.apify.com/api/v2)
-- **Webhooks** - Get notified when scraping completes
-- **Scheduling** - Set up recurring runs on any schedule
-- **Zapier / Make** - Connect with 5,000+ apps via [Apify integrations](https://apify.com/integrations)
-- **Python / Node.js SDKs** - Native client libraries for easy integration
+Apache-2.0
