@@ -1,266 +1,202 @@
-[Crossref Scraper](https://apify.com/automation-lab/crossref-scraper?fpr=data)
+[Crossref Scraper](https://apify.com/openclawmara/crossref-scraper?fpr=data)
 
-Search and extract academic papers, journal articles, and scholarly works from Crossref's database of over 130 million records. Get titles, authors, DOIs, citation counts, abstracts, and publication metadata.
+# 🔗 Crossref Scraper — DOI Metadata for 150M+ Scholarly Works
 
-## What does Crossref Scraper do?
+**Structured metadata, citation counts, and author affiliations from the world's largest DOI registry. $0.004 per article.**
 
-Crossref Scraper searches the Crossref REST API — the world's largest database of scholarly metadata — and extracts structured data from matching works. It returns paper titles, author lists, DOIs, citation counts, abstracts, journal names, publication dates, and licensing information.
+Scrape [Crossref](https://www.crossref.org) — the DOI registration agency for scholarly publishers — for titles, authors, DOIs, publication dates, journal info, citation counts, references, and funder data across 150M+ articles, books, datasets, and preprints.
 
-You can search by keyword, filter by work type (journal article, book chapter, conference paper, etc.), and sort by relevance, publication date, or citation count.
+Uses the official Crossref REST API. No auth required. Free for non-commercial use under Crossref's public data policy.
 
-## Who is Crossref Scraper for?
+## 🚀 What does this Actor do?
 
-- **Academic researchers** conducting literature reviews and bibliometric analyses across disciplines
-- **Data scientists** building training datasets for scholarly AI models and recommendation engines
-- **Research administrators** tracking publication output and citation impact for institutions
-- **Science journalists** sourcing citation data and identifying influential papers for reporting
-- **Library professionals** cataloging and analyzing scholarly works across publishers
-- **Graduate students** surveying research landscapes and identifying key papers for thesis work
+Crossref is the backbone of academic citation infrastructure — almost every journal article, conference paper, book chapter, and dataset has a Crossref DOI. This Actor turns Crossref into a programmable source in two modes:
 
-## Why scrape Crossref?
+- **Search** — Full-text search by keyword across 150M+ works, with year range, citation count, and sort filters.
+- **DOI lookup** — Bulk-fetch metadata for a list of DOIs you already have (bibliographies, reference lists, dataset citations).
 
-Crossref indexes over 130 million scholarly works from 18,000+ publishers. It's the authoritative source for:
+Unlike Google Scholar (no API) or Semantic Scholar (focused on citations), Crossref is the **authoritative publisher metadata** — it's where the citation count originates, where the DOI resolves, and where the funder data lives.
 
-- **Literature reviews** — find relevant papers by keyword and sort by citation impact
-- **Bibliometric analysis** — study citation patterns, publication trends, and research output
-- **Dataset construction** — build training data for academic AI models or recommendation systems
-- **Research monitoring** — track new publications in specific fields or by specific authors
-- **Citation analysis** — identify the most influential papers in any research area
-- **Publisher intelligence** — analyze publication volumes and patterns across journals
+## 💡 Use Cases
 
-## How much does it cost to scrape Crossref?
+### 1. Systematic literature review automation
 
-Crossref Scraper uses pay-per-event pricing:
-
-| Event | Price |
-| --- | --- |
-| Run started | $0.001 |
-| Paper extracted | $0.001 per paper |
-
-**Example costs:**
-
-- 20 most-cited papers on "deep learning": ~$0.021
-- 100 recent papers on "CRISPR": ~$0.101
-- 500 papers across 5 research topics: ~$0.506
-
-Platform costs are minimal — a typical run uses under $0.002 in compute.
-
-## Input parameters
-
-| Parameter | Type | Description | Default |
-| --- | --- | --- | --- |
-| `searchQueries` | string[] | Keywords to search for in academic papers | Required |
-| `type` | string | Filter by work type: journal-article, book-chapter, proceedings-article, book, dataset, report, dissertation, preprint | All types |
-| `sortBy` | string | Sort results: `relevance`, `published` (newest first), `is-referenced-by-count` (most cited) | `relevance` |
-| `maxResults` | integer | Maximum papers per keyword (1–1000) | `50` |
-
-### Input example
+Pull every paper on a topic within a year range and feed the metadata into a structured review table.
 
 ```
 {
-  "searchQueries": ["machine learning", "deep learning"],
+  "searchQueries": ["retrieval augmented generation"],
+  "maxResults": 500,
+  "fromYear": 2022,
+  "toYear": 2026,
+  "sortBy": "published"
+}
+```
+
+### 2. Citation graph building
+
+You have a list of DOIs (from a bibliography, a dataset, a search result). Pull full metadata + reference lists.
+
+```
+{
+  "dois": [
+    "10.1038/s41586-023-06747-5",
+    "10.1126/science.aap8731",
+    "10.48550/arXiv.1706.03762"
+  ]
+}
+```
+
+### 3. Research analytics dashboard
+
+Track publication volume and citation trends for a field, author, or publisher over time.
+
+```
+{
+  "searchQueries": ["large language models"],
+  "maxResults": 1000,
+  "fromYear": 2020,
   "sortBy": "is-referenced-by-count",
-  "maxResults": 20
+  "minCitations": 10
 }
 ```
 
-## Output example
+### 4. Publisher / journal monitoring
 
-Each paper is returned as a JSON object:
+Feed a Slack channel new publications in a domain, weekly.
 
 ```
 {
-  "doi": "10.1038/nature14539",
-  "title": "Deep learning",
-  "authors": ["Yann LeCun", "Yoshua Bengio", "Geoffrey Hinton"],
-  "abstract": "Deep learning allows computational models that are composed of multiple processing layers to learn representations of data with multiple levels of abstraction...",
-  "type": "journal-article",
+  "searchQueries": ["CRISPR gene editing"],
+  "maxResults": 100,
+  "fromYear": 2026,
+  "sortBy": "published"
+}
+```
+
+## 📊 Output Example
+
+```
+{
+  "doi": "10.1038/s41586-023-06747-5",
+  "title": "A foundation model of transcription across human cell types",
+  "authors": [
+    { "given": "Xi", "family": "Fu", "affiliation": ["Columbia University"] },
+    { "given": "Shentong", "family": "Mo", "affiliation": ["Carnegie Mellon University"] }
+  ],
+  "publishedDate": "2025-01-15",
+  "publishedYear": 2025,
+  "containerTitle": "Nature",
   "publisher": "Springer Science and Business Media LLC",
-  "journal": "Nature",
-  "publishedDate": "2015-05-27",
-  "citationCount": 69717,
-  "referenceCount": 73,
-  "url": "https://doi.org/10.1038/nature14539",
-  "subjects": ["Multidisciplinary"],
-  "license": "https://www.springer.com/tdm",
-  "language": "en",
-  "page": "436-444",
-  "volume": "521",
-  "issue": "7553",
-  "isbn": [],
+  "type": "journal-article",
+  "volume": "637",
+  "issue": "8047",
+  "page": "965-973",
+  "isReferencedByCount": 142,
+  "referencesCount": 67,
+  "url": "https://doi.org/10.1038/s41586-023-06747-5",
+  "abstract": "The human genome contains...",
+  "subject": ["Multidisciplinary"],
+  "funder": [
+    { "name": "National Institutes of Health", "award": ["R01HG012875"] }
+  ],
   "issn": ["0028-0836", "1476-4687"],
-  "scrapedAt": "2026-03-03T04:20:00.000Z"
+  "license": [{ "URL": "https://creativecommons.org/licenses/by/4.0/" }]
 }
 ```
 
-## What data can you extract from Crossref?
+## ⚙️ Input Parameters
 
-| Field | Type | Description |
+| Parameter | Type | Description |
 | --- | --- | --- |
-| `doi` | string | Digital Object Identifier — unique paper identifier |
-| `title` | string | Paper title |
-| `authors` | string[] | List of author names |
-| `abstract` | string | Paper abstract (when available) |
-| `type` | string | Work type (journal-article, book-chapter, etc.) |
-| `publisher` | string | Publisher name |
-| `journal` | string | Journal or container title |
-| `publishedDate` | string | Publication date (YYYY-MM-DD format) |
-| `citationCount` | number | Number of times this work has been cited |
-| `referenceCount` | number | Number of references in this work |
-| `url` | string | DOI URL linking to the paper |
-| `subjects` | string[] | Subject categories |
-| `license` | string | License URL |
-| `language` | string | Language code |
-| `page` | string | Page range |
-| `volume` | string | Journal volume |
-| `issue` | string | Journal issue |
-| `isbn` | string[] | ISBN identifiers (for books) |
-| `issn` | string[] | ISSN identifiers (for journals) |
-| `scrapedAt` | string | ISO timestamp when data was extracted |
+| `searchQueries` | array | Keywords/phrases (e.g. `["CRISPR gene editing", "large language models"]`) |
+| `dois` | array | Specific DOIs to fetch metadata for (e.g. `["10.1038/s41586-023-06747-5"]`) |
+| `maxResults` | int | Results per query (default 50, max 1000) |
+| `sortBy` | enum | `relevance` (default), `published`, `is-referenced-by-count` |
+| `fromYear` | int | Only articles published from this year |
+| `toYear` | int | Only articles published up to this year |
+| `minCitations` | int | Only include articles with ≥ N citations (default 0) |
 
-## How to scrape academic papers from Crossref
+## 📤 Output Fields
 
-1. Go to the [Crossref Scraper](https://apify.com/automation-lab/crossref-scraper) page on Apify Store.
-2. Click **Try for free** to open the actor in Apify Console.
-3. Enter one or more search keywords (e.g., "machine learning", "CRISPR").
-4. Optionally filter by work type, sort order, and maximum results.
-5. Click **Start** and download your data as JSON, CSV, or Excel from the **Dataset** tab.
+| Field | Description |
+| --- | --- |
+| `doi` | Digital Object Identifier (canonical) |
+| `title` | Article title |
+| `authors[]` | `{ given, family, affiliation[] }` per author |
+| `publishedDate`, `publishedYear` | ISO date + year |
+| `containerTitle` | Journal / conference / book name |
+| `publisher` | Publisher name |
+| `type` | `journal-article`, `book-chapter`, `proceedings-article`, `dataset`, `preprint`, etc. |
+| `volume`, `issue`, `page` | Bibliographic location |
+| `isReferencedByCount` | Citation count (from Crossref) |
+| `referencesCount` | Number of references in the article |
+| `url` | DOI resolver URL |
+| `abstract` | When available (~30% of articles) |
+| `subject[]` | Subject categories |
+| `funder[]` | Funder + award/grant IDs |
+| `issn[]` | Journal ISSNs |
+| `license[]` | Open-access license info when present |
 
-## How to use the Crossref Scraper API
+## 💰 Pricing & Performance
 
-### Python
+- **Pay-per-event:** **$0.004 per article**.
+- **Typical cost:** $4 for 1000 articles — a full systematic review for the price of a coffee.
+- **Speed:** ~100–150 articles/minute via the official Crossref REST API.
+- **No auth required** — Crossref API is fully open (with polite-pool pacing for sustained usage).
+- **Bulk-friendly** — up to 1000 results per search query.
 
-```
-from apify_client import ApifyClient
+## 🔌 Integrations
 
-client = ApifyClient("YOUR_API_TOKEN")
+- **Vector DBs (Pinecone, Weaviate, Qdrant, pgvector)** — embed titles + abstracts for semantic scholarly search.
+- **LangChain / LlamaIndex** — power a "research assistant" RAG over a year-range corpus.
+- **Neo4j / graph DBs** — build a citation network: `author → paper → references → paper`.
+- **Zapier / Make / n8n** — weekly "new papers in my field" digest to Slack, email, or Notion.
+- **Systematic review tools (Covidence, Rayyan)** — bulk-import metadata from a search.
+- **Airbyte / Fivetran** — load structured metadata into a data warehouse for bibliometrics.
 
-run = client.actor("automation-lab/crossref-scraper").call(run_input={
-    "searchQueries": ["transformer neural network"],
-    "sortBy": "is-referenced-by-count",
-    "maxResults": 50,
-})
+## 🧭 DOI Prefix Reference
 
-for item in client.dataset(run["defaultDatasetId"]).iterate_items():
-    authors = ", ".join(item["authors"][:3])
-    print(f"{item['title']}")
-    print(f"  {authors} | {item['publishedDate']} | {item['citationCount']} citations")
-    print(f"  DOI: {item['doi']}")
-```
+- `10.1038` — Nature Publishing Group
+- `10.1126` — AAAS (Science)
+- `10.1145` — ACM
+- `10.1109` — IEEE
+- `10.48550` — arXiv preprints (yes, arXiv has DOIs too)
+- `10.1101` — bioRxiv / medRxiv
+- `10.21105` — Journal of Open Source Software
+- Full prefix list: [https://www.crossref.org/getting-started/prefix/](https://www.crossref.org/getting-started/prefix/)
 
-### Node.js
+## ❓ FAQ
 
-```
-import { ApifyClient } from 'apify-client';
+**Why use Crossref over Google Scholar?**
+Google Scholar has no official API and aggressively blocks scrapers. Crossref has a free, well-documented REST API that returns canonical metadata — the same data Google Scholar uses under the hood.
 
-const client = new ApifyClient({ token: 'YOUR_API_TOKEN' });
+**Crossref vs Semantic Scholar?**
+Crossref = **authoritative publisher metadata** (title, authors, DOI, journal, date, basic citation count). Semantic Scholar = **enriched citation graph + influential-citation signal**. Use both for a complete picture — this Actor's `dois[]` mode pairs perfectly with the Semantic Scholar scraper.
 
-const run = await client.actor('automation-lab/crossref-scraper').call({
-    searchQueries: ['transformer neural network'],
-    sortBy: 'is-referenced-by-count',
-    maxResults: 50,
-});
+**Does every article have an abstract?**
+About 30% do. Crossref's abstract coverage depends on the publisher's metadata submission. For guaranteed abstracts, follow up with arXiv / PubMed / Semantic Scholar.
 
-const { items } = await client.dataset(run.defaultDatasetId).listItems();
-items.forEach(item => {
-    console.log(`${item.title} (${item.citationCount} citations)`);
-    console.log(`  DOI: ${item.doi}`);
-});
-```
+**Can I pull references (who this paper cites)?**
+Partially — `referencesCount` is always returned; the full reference list is included when the publisher deposits it with Crossref (roughly half of articles). For guaranteed reference lists, use OpenCitations or the publisher's native API.
 
-### REST API
+**What's the difference between `published` sort and `fromYear` filter?**
+`sortBy: published` orders results newest-first. `fromYear`/`toYear` restricts the year range. Use them together for "newest papers in the last 3 years."
 
-```
-curl -X POST "https://api.apify.com/v2/acts/automation-lab/crossref-scraper/runs?token=YOUR_API_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "searchQueries": ["machine learning"],
-    "sortBy": "is-referenced-by-count",
-    "maxResults": 20
-  }'
-```
+**Rate limits?**
+Crossref requests you identify yourself for sustained high-volume usage (polite pool). The Actor handles this automatically — you just set `maxResults` and wait.
 
-## Integrations
+## 🔗 Companions
 
-Connect Crossref Scraper to hundreds of apps using built-in integrations:
+- [arXiv Paper Scraper](https://apify.com/Helpermara/arxiv-paper-scraper) — Preprints before they're officially published.
+- [Semantic Scholar Scraper](https://apify.com/Helpermara/semantic-scholar-scraper) — Citation graphs and influence metrics.
+- [ORCID Scraper](https://apify.com/Helpermara/orcid-scraper) — Author profiles and disambiguated publication histories.
+- [DBLP Scraper](https://apify.com/Helpermara/dblp-scraper) — Computer science bibliography with clean author data.
 
-- **Google Sheets** — export citation data to spreadsheets for analysis
-- **Slack / Microsoft Teams** — get notifications when scraping completes
-- **Zapier / Make** — trigger workflows with new paper data
-- **Amazon S3 / Google Cloud Storage** — store large research datasets
-- **Webhook** — send results to your own API endpoint
+## 🔑 Keywords
 
-## Tips and best practices
+Crossref scraper, Crossref API, DOI lookup, DOI metadata, scholarly articles API, academic paper metadata, citation count scraper, bibliometrics data, systematic review automation, literature review scraper, journal article scraper, publisher metadata, publication tracking, citation graph, research analytics, scientific publication data, open science metadata, Crossref bulk export, DOI resolver API, scholarly search API, RAG over research papers.
 
-1. **Sort by citations** — use `is-referenced-by-count` to find the most influential papers in any field.
-2. **Filter by type** — narrow results to journal articles, conference papers, or books to focus your search.
-3. **Combine keywords** — use multiple search terms like `["CRISPR", "gene therapy", "genome editing"]` to cover a topic broadly.
-4. **Abstract availability** — not all papers have abstracts in Crossref. About 30-40% include them.
-5. **Citation counts** — these reflect citations tracked by Crossref, which may differ from Google Scholar or Scopus counts.
-6. **Rate limits** — the scraper uses Crossref's polite pool (with mailto) for faster responses. No API key needed.
-7. **Up to 1000 per keyword** — for larger datasets, use multiple related keywords.
+## 📝 Changelog
 
-## Use with AI agents via MCP
-
-Crossref Scraper is available as a tool for AI assistants via the [Model Context Protocol (MCP)](https://docs.apify.com/platform/integrations/mcp).
-
-### Setup for Claude Code
-
-```
-$claude mcp add --transport http apify "https://mcp.apify.com?tools=automation-lab/crossref-scraper"
-```
-
-### Setup for Claude Desktop, Cursor, or VS Code
-
-Add this to your MCP config file:
-
-```
-{
-    "mcpServers": {
-        "apify": {
-            "url": "https://mcp.apify.com?tools=automation-lab/crossref-scraper"
-        }
-    }
-}
-```
-
-### Example prompts
-
-- "Search Crossref for papers about 'CRISPR gene editing'"
-- "Get citation metadata for this DOI"
-- "Find the most-cited machine learning papers published in 2024 using Crossref"
-
-## FAQ
-
-**Q: How current is the data?**
-A: Crossref data is updated continuously as publishers register new DOIs. Most papers appear within days of publication.
-
-**Q: Does it include full paper text?**
-A: No. Crossref stores metadata only — titles, authors, abstracts, DOIs, and citations. For full text, follow the DOI link to the publisher's site.
-
-**Q: Do I need an API key?**
-A: No. Crossref's API is completely open. The scraper uses the polite pool for better performance.
-
-**Q: What types of works are covered?**
-A: Journal articles, book chapters, conference papers, books, datasets, reports, dissertations, preprints, and more — anything with a DOI registered through Crossref.
-
-**Q: Why are some papers missing abstracts?**
-A: Only about 30-40% of papers in Crossref include abstracts. This depends on whether the publisher deposits abstract text when registering the DOI. There is no workaround on the scraper side.
-
-**Q: Why do I get fewer results than expected?**
-A: Crossref returns up to 1,000 results per keyword. If your search term is very broad, the API may still limit results. Try more specific keywords or use multiple related search terms to cover the topic.
-
-## Is it legal to scrape Crossref?
-
-Crossref is a non-profit organization that provides open, freely accessible metadata for scholarly works. The Crossref REST API is public, requires no authentication, and is explicitly designed for programmatic access to bibliographic data.
-
-Crossref metadata -- titles, authors, DOIs, citation counts, and publication dates -- is factual bibliographic information that publishers voluntarily deposit. The API includes a "polite pool" that provides faster access to clients who identify themselves, which this scraper uses.
-
-Crossref's [Terms of Use](https://www.crossref.org/operations-and-sustainability/terms-of-use/) permit free use of their metadata. The scraper does not access full-text content, which remains on publisher websites under their own licensing terms.
-
-## Other academic and research scrapers
-
-- [ClinicalTrials.gov Scraper](https://apify.com/automation-lab/clinicaltrials-scraper) -- Scrape clinical trial data from ClinicalTrials.gov.
-- [OpenAlex Scraper](https://apify.com/automation-lab/openalex-scraper) -- Extract scholarly works and author data from OpenAlex.
-- [Semantic Scholar Scraper](https://apify.com/automation-lab/semantic-scholar-scraper) -- Search papers and citations on Semantic Scholar.
-- [arXiv Scraper](https://apify.com/automation-lab/arxiv-scraper) -- Scrape preprints and research papers from arXiv.
+- **v1.0** — Initial release. Keyword search + DOI lookup modes, year range filter, citation count filter, 3 sort modes, up to 1000 results per search.
